@@ -86,10 +86,10 @@ public class MoviesApiDeleteMoviesByIdTest {
     }
 
 
-    public HttpResponse<String> sendDeleteMoviesRequest(String ID) throws Exception{
+    public HttpResponse<String> sendDeleteMoviesRequest(String id) throws Exception{
         HttpRequest request = HttpRequest.newBuilder()
                 .DELETE()
-                .uri(URI.create(BASE + "/movies/" + ID))
+                .uri(URI.create(BASE + "/movies/" + id))
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json; charset=UTF-8")
                 .header("User-Agent",
