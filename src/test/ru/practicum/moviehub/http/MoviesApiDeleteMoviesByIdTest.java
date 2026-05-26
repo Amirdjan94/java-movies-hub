@@ -86,7 +86,7 @@ public class MoviesApiDeleteMoviesByIdTest {
     }
 
 
-    public HttpResponse<String> sendDeleteMoviesRequest(String id) throws Exception{
+    public HttpResponse<String> sendDeleteMoviesRequest(String id) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .DELETE()
                 .uri(URI.create(BASE + "/movies/" + id))
