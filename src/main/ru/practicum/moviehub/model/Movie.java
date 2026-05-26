@@ -5,7 +5,7 @@ import java.util.Objects;
 public class Movie {
     private String title;
     private Integer year; // TODO: Добавить валидацию поля
-    private int Id;
+    private int id;
 
     public Movie(String title, int year) {
         this.title = title;
@@ -13,11 +13,11 @@ public class Movie {
     }
 
     public int getId() {
-        return Id;
+        return id;
     }
 
     public void setId(int id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getTitle() {
@@ -39,7 +39,7 @@ public class Movie {
     @Override
     public String toString() {
         return "{" +
-                "Id=" + Id +
+                "Id=" + id +
                 ", Название фильма ='" + title + '\'' +
                 ", Год =" + year +
                 '}';
