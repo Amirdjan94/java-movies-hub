@@ -12,11 +12,14 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class MoviesHandler extends BaseHttpHandler {
 
     MoviesStore moviesStore;
     private Gson gson = new Gson();
+    private static final int MAX_LEGTH_TITLE = 100;
+    private static final int MIN_YEAR_MOVIES = 1888;
 
     public MoviesHandler(MoviesStore moviesStore) {
         this.moviesStore = moviesStore;
@@ -91,11 +94,10 @@ public class MoviesHandler extends BaseHttpHandler {
             if (errorArray.length != 0) {
                 ErrorResponse errorResponse = new ErrorResponse(errorArray, "Ошибка валидации");
                 sendJson(exchange, 422, gson.toJson(errorResponse));
-            } else if (moviesStore.getMoviesMap().containsValue(movie)) {
+            } else if (!moviesStore.addMovies(movie)) {
                 ErrorResponse errorResponse = new ErrorResponse(new String[]{"фильм был добавлен ранее"}, "Ошибка валидации");
                 sendJson(exchange, 422, gson.toJson(errorResponse));
             } else {
-                moviesStore.addMovies(movie);
                 sendJson(exchange, 201, gson.toJson(moviesStore.getMoviesMap().get(moviesStore.movieID - 1)));
             }
         } catch (IOException e) {
@@ -108,8 +110,9 @@ public class MoviesHandler extends BaseHttpHandler {
         String[] pathParts = exchange.getRequestURI().getPath().split("/");
         try {
             int moviesID = Integer.parseInt(pathParts[2]);
-            if (moviesStore.getMoviesMap().containsKey(moviesID)) {
-                sendJson(exchange, 200, gson.toJson(moviesStore.getMoviesMap().get(moviesID)));
+            Optional<Movie> optionalMovie = moviesStore.getMovieById(moviesID);
+            if (optionalMovie.isPresent()) {
+                sendJson(exchange, 200, gson.toJson(optionalMovie.get()));
             } else {
                 sendJson(exchange, 404, gson.toJson("Фильм не найден"));
             }
@@ -122,8 +125,7 @@ public class MoviesHandler extends BaseHttpHandler {
         String[] pathParts = exchange.getRequestURI().getPath().split("/");
         try {
             int moviesID = Integer.parseInt(pathParts[2]);
-            if (moviesStore.getMoviesMap().containsKey(moviesID)) {
-                moviesStore.getMoviesMap().remove(moviesID);
+            if (moviesStore.deleteMovies(moviesID)) {
                 sendNoContent(exchange);
             } else {
                 sendJson(exchange, 404, gson.toJson("Фильм не найден"));
@@ -156,23 +158,17 @@ public class MoviesHandler extends BaseHttpHandler {
         List<String> errorList = new ArrayList<>();
         if (movie.getTitle() == null || movie.getTitle().isBlank()) {
             errorList.add("название не должно быть пустым");
-        } else if (movie.getTitle().trim().length() > 100) {
-            errorList.add("длина названия не должно превышать 100 символов");
+        } else if (movie.getTitle().trim().length() > MAX_LEGTH_TITLE) {
+            errorList.add("длина названия не должно превышать " + MAX_LEGTH_TITLE + " символов");
         }
-        if (movie.getYear() == 0 || movie.getYear() < 1888 || movie.getYear() > (LocalDate.now().getYear() + 1)) {
-            errorList.add("год должен быть между 1888 и 2026");
+        if (movie.getYear() == 0 || movie.getYear() < MIN_YEAR_MOVIES || movie.getYear() > (LocalDate.now().getYear() + 1)) {
+            errorList.add("год должен быть между " + MIN_YEAR_MOVIES + " и " + LocalDate.now().getYear());
         }
         return errorList.toArray(new String[0]);
     }
 
     private List<Movie> getMovieStorByYear(int year) {
-        List<Movie> lisMovie = new ArrayList<>();
-        for (int movieId : moviesStore.getMoviesMap().keySet()) {
-            if (moviesStore.getMoviesMap().get(movieId).getYear() == year) {
-                lisMovie.add(moviesStore.getMoviesMap().get(movieId));
-            }
-        }
-        return lisMovie;
+        return moviesStore.getMovieListByYear(year);
     }
 }
 
