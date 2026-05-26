@@ -14,7 +14,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -92,10 +91,10 @@ public class MoviesApiGetMoviesByIdTest {
     }
 
 
-    public HttpResponse<String> sendGetMoviesRequest(String ID) throws Exception {
+    public HttpResponse<String> sendGetMoviesRequest(String id) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create(BASE + "/movies/" + ID))
+                .uri(URI.create(BASE + "/movies/" + id))
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json; charset=UTF-8")
                 .header("User-Agent",
